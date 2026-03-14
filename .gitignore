@@ -1,0 +1,21 @@
+# Binaries
+chronos-mcp
+chronos-mcp.exe
+
+# Testing
+coverage.out
+coverage.html
+
+# Internal Agent Docs
+AGENTS.md
+
+# Dependencies
+vendor/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDEs
+.vscode/
+.idea/

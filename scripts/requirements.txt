@@ -1,0 +1,7 @@
+# Hippocampal Replay Requirements
+# Python 3.7+ required
+
+# SQLite3 is part of Python standard library, no additional dependencies needed
+# For LLM integration (future), uncomment below:
+# openai>=1.0.0
+# anthropic>=0.3.0
