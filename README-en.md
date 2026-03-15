@@ -9,7 +9,8 @@ Based on neuroscientific insights, memory is managed across four distinct layers
 - **Short-term Memory (Simple Memory)**: Raw conversation logs.
 - **Semantic Memory**: Recall via vector search (Future extension).
 - **Relational Memory (GraphRAG)**: Causal relationships between knowledge pieces.
-- **Consolidation Layer [NEW]**: Summarization and abstraction of memories via sleep cycles.
+- **Consolidation Layer**: Summarization and abstraction of memories via sleep cycles.
+- **Metabolism System [NEW]**: Incremental memory sublimation. Automatically detects new turns and consolidates them in real-time.
 
 ### 2. Time Awareness Hook (v2.1)
 Enables agents to perceive the passage of time:
@@ -28,8 +29,9 @@ The system features a hybrid architecture, separating the real-time server layer
     - Direct SQLite DB access and persistence.
     - Time Awareness Hook for real-time context injection.
     - Core business logic and high-performance data handling.
-- **Python (Consolidation Batch / Analyzer)**:
-    - Background processing during "Sleep Cycles" (AM 3:00 - 4:00).
+- **Python (Consolidation & Metabolism)**:
+    - Background processing during "Sleep Cycles" (AM 3:00 - 4:00) (`hippocampal_replay.py`).
+    - **Incremental Metabolism** (`metabolism.py`): Automatically detects new turns and consolidates them in real-time.
     - LLM-based summarization and abstraction of conversation logs.
     - Identification of causal links between memories.
     - Extraction of Persona Anchors for deeper user understanding.
