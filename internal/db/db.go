@@ -35,6 +35,11 @@ type SessionLog struct {
 	Summary   string    `json:"summary"`
 }
 
+type ConsolidationMetadata struct {
+	LastProcessedTurnID int64     `json:"last_processed_turn_id"`
+	UpdatedAt           time.Time `json:"updated_at"`
+}
+
 type ConversationTurn struct {
 	ID              int64     `json:"id"`
 	SessionID       string    `json:"session_id"`
@@ -109,6 +114,14 @@ func (db *DB) initSchema() error {
 		timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
 		summary TEXT
 	);
+
+	CREATE TABLE IF NOT EXISTS consolidation_metadata (
+		last_processed_turn_id INTEGER PRIMARY KEY,
+		updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+	);
+
+	-- Initialize metadata if empty
+	INSERT OR IGNORE INTO consolidation_metadata (last_processed_turn_id) VALUES (0);
 
 	CREATE INDEX IF NOT EXISTS idx_snapshots_env ON memory_snapshots(environment);
 	CREATE INDEX IF NOT EXISTS idx_snapshots_created ON memory_snapshots(created_at);
@@ -342,4 +355,29 @@ func (db *DB) AnalyzeSession(ctx context.Context, sessionID string) (*ThoughtEvo
 
 func (db *DB) Close() error {
 	return db.conn.Close()
+}
+
+// Consolidation Metadata operations
+
+func (db *DB) GetConsolidationMetadata(ctx context.Context) (*ConsolidationMetadata, error) {
+	var m ConsolidationMetadata
+	var updatedAtStr string
+	err := db.conn.QueryRowContext(ctx,
+		`SELECT last_processed_turn_id, updated_at FROM consolidation_metadata LIMIT 1`).
+		Scan(&m.LastProcessedTurnID, &updatedAtStr)
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	m.UpdatedAt, _ = time.Parse("2006-01-02 15:04:05", updatedAtStr)
+	return &m, nil
+}
+
+func (db *DB) UpdateConsolidationMetadata(ctx context.Context, lastTurnID int64) error {
+	_, err := db.conn.ExecContext(ctx,
+		`UPDATE consolidation_metadata SET last_processed_turn_id = ?, updated_at = CURRENT_TIMESTAMP`,
+		lastTurnID)
+	return err
 }

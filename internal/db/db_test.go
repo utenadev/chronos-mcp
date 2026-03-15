@@ -758,6 +758,50 @@ func TestDB_CreateAnnotationAndGetAnnotations(t *testing.T) {
 	}
 }
 
+// Test Consolidation Metadata
+func TestDB_ConsolidationMetadata(t *testing.T) {
+	tempDir, err := ioutil.TempDir("", "chronos-meta-test")
+	if err != nil {
+		t.Fatalf("failed to create temp dir: %v", err)
+	}
+	defer os.RemoveAll(tempDir)
+
+	db, err := NewDB(tempDir)
+	if err != nil {
+		t.Fatalf("failed to create db: %v", err)
+	}
+	defer db.Close()
+
+	ctx := context.Background()
+
+	// 1. Initial metadata (should be 0)
+	meta, err := db.GetConsolidationMetadata(ctx)
+	if err != nil {
+		t.Fatalf("GetConsolidationMetadata failed: %v", err)
+	}
+	if meta == nil {
+		t.Fatal("expected initial metadata, got nil")
+	}
+	if meta.LastProcessedTurnID != 0 {
+		t.Errorf("expected LastProcessedTurnID 0, got %d", meta.LastProcessedTurnID)
+	}
+
+	// 2. Update metadata
+	err = db.UpdateConsolidationMetadata(ctx, 42)
+	if err != nil {
+		t.Fatalf("UpdateConsolidationMetadata failed: %v", err)
+	}
+
+	// 3. Verify update
+	meta, err = db.GetConsolidationMetadata(ctx)
+	if err != nil {
+		t.Fatalf("GetConsolidationMetadata after update failed: %v", err)
+	}
+	if meta.LastProcessedTurnID != 42 {
+		t.Errorf("expected LastProcessedTurnID 42, got %d", meta.LastProcessedTurnID)
+	}
+}
+
 // Test AnalyzeSession
 func TestDB_AnalyzeSession(t *testing.T) {
 	tempDir, err := ioutil.TempDir("", "chronos-analyze-test")
